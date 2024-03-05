@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  mysql-container:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: Wao2522..
+      MYSQL_DATABASE: loan
+      MYSQL_USER: winfred
+      MYSQL_PASSWORD: Wao2522..
+    ports:
+      - "4306:3306"
+    networks:
+      - mynetwork
+
+  eureka-server:
+    image: winfred02/eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - mynetwork
+
+  gateway-service:
+    image: winfred02/gateway-service:latest
+    container_name: gateway-service
+    ports:
+      - "8020:8020"
+    networks:
+      - mynetwork
+    depends_on:
+      - eureka-server
+      - loan-app
+      - loan-app-client2
+
+  loan-app:
+    image: winfred02/loan-app:latest
+    container_name: loan-app
+    networks:
+      - mynetwork
+    depends_on:
+      - eureka-server
+      - mysql-container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/loan
+      SPRING_DATASOURCE_USERNAME: winfred
+      SPRING_DATASOURCE_PASSWORD: Wao2522..
+    ports:
+      - "8021:8021"
+
+  loan-app-client2:
+    image: winfred02/loan-app-client2:latest
+    container_name: loan-app-client2
+    networks:
+      - mynetwork
+    depends_on:
+      - eureka-server
+      - mysql-container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/loan
+      SPRING_DATASOURCE_USERNAME: winfred
+      SPRING_DATASOURCE_PASSWORD: Wao2522..
+    ports:
+      - "8022:8022"
+
+networks:
+  mynetwork:
+    driver: bridge
